@@ -7,60 +7,72 @@
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
     body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; padding: 22px; text-align: center; color: #222; }
-    h2 { margin: 0 0 6px; }
-    p { color: #555; margin: 0 0 16px; }
-    button { font-size: 18px; padding: 14px 24px; background: #e04f2a; color: #fff;
-             border: none; border-radius: 10px; cursor: pointer; }
+    h2 { margin: 0 0 6px; } p { color: #555; margin: 0 0 16px; }
+    button { font-size: 18px; padding: 14px 24px; background: #e04f2a; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
     button:disabled { opacity: .5; cursor: default; }
-    .msg { margin-top: 16px; min-height: 22px; font-weight: 600; }
-    .ok { color: #1a7f37; } .err { color: #c5421f; } .info { color: #555; }
+    .spinner { width: 34px; height: 34px; margin: 18px auto 8px; border: 4px solid #f0d7cf; border-top-color: #e04f2a; border-radius: 50%; animation: spin 0.9s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .steps { margin-top: 8px; text-align: center; font-size: 14px; line-height: 2; }
+    .step { color: #bbb; } .step.active { color: #e04f2a; font-weight: 700; } .step.done2 { color: #1a7f37; }
+    .msg { margin-top: 12px; min-height: 22px; font-weight: 600; }
+    .ok { color: #1a7f37; } .err { color: #c5421f; }
   </style>
 </head>
 <body>
   <h2>בקשת רכש — Boardirector</h2>
-  <p>שולח את החשבונית מהמייל הזה למילוי הטופס.</p>
+  <p>ממלא את הטופס מהחשבונית שבמייל זה.</p>
   <button id="go">מלא בקשת רכש ⟶</button>
-  <div class="msg info" id="msg"></div>
+  <div class="spinner" id="spin"></div>
+  <div class="steps" id="steps" style="display:none">
+    <div class="step" id="s1">📄 קורא את החשבונית</div>
+    <div class="step" id="s2">📝 ממלא את הטופס בדפדפן</div>
+    <div class="step" id="s3">✅ מוכן לבדיקה</div>
+  </div>
+  <div class="msg" id="msg"></div>
   <script>
-    var HELPER = 'https://localhost:8765/fill';
-    function setMsg(t, cls) { var m = document.getElementById('msg'); m.textContent = t; m.className = 'msg ' + (cls || 'info'); }
-
-    function run() {
-      var btn = document.getElementById('go'); btn.disabled = true;
-      var item = Office.context.mailbox.item;
-      var atts = (item.attachments || []).filter(function (a) {
-        return a.attachmentType === 'file' && /\.pdf$/i.test(a.name);
-      });
-      if (!atts.length) { setMsg('לא נמצאה צרופת PDF במייל הזה', 'err'); btn.disabled = false; return; }
-      var pdf = atts[0];
-      setMsg('קורא את הצרופה…', 'info');
-
-      item.body.getAsync('text', function (bodyRes) {
-        var emailText = (bodyRes.status === 'succeeded') ? bodyRes.value : '';
-        item.getAttachmentContentAsync(pdf.id, function (res) {
-          if (res.status !== 'succeeded') { setMsg('שגיאה בקריאת הצרופה: ' + (res.error && res.error.message), 'err'); btn.disabled = false; return; }
-          setMsg('שולח לעוזר וממלא את הטופס…', 'info');
-          fetch(HELPER, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: pdf.name, contentBase64: res.value.content, emailText: emailText })
-          }).then(function (r) { return r.json(); })
-            .then(function (j) {
-              if (j.ok) setMsg('✓ נשלח! הטופס מתמלא בדפדפן — בדוק ולחץ שלח.', 'ok');
-              else setMsg('שגיאה: ' + j.error, 'err');
-              btn.disabled = false;
-            })
-            .catch(function (e) {
-              setMsg('לא הצלחתי להתחבר לעוזר המקומי. ודא שהוא רץ. (' + e.message + ')', 'err');
-              btn.disabled = false;
-            });
-        });
+    var HELPER = 'https://localhost:8765';
+    function $(id){ return document.getElementById(id); }
+    function setMsg(t, cls){ var m=$('msg'); m.textContent=t||''; m.className='msg '+(cls||''); }
+    function show(el, on){ el.style.display = on ? '' : 'none'; }
+    function stage(active){
+      ['s1','s2','s3'].forEach(function(id,i){
+        var el=$(id), n=i+1;
+        el.className = 'step' + (n<active?' done2':'') + (n===active?' active':'');
       });
     }
 
-    Office.onReady(function () {
-      document.getElementById('go').addEventListener('click', run);
-    });
+    function poll(id, tries){
+      tries = tries || 0;
+      if (tries > 150) { setMsg('לוקח יותר מהרגיל — בדוק את הדפדפן.', 'err'); show($('spin'),false); $('go').disabled=false; return; }
+      fetch(HELPER + '/status?id=' + encodeURIComponent(id)).then(function(r){return r.json();}).then(function(j){
+        if (j.status === 'reading') { stage(1); setTimeout(function(){poll(id,tries+1);}, 2000); }
+        else if (j.status === 'filling') { stage(2); setTimeout(function(){poll(id,tries+1);}, 2000); }
+        else if (j.status === 'done') { stage(4); show($('spin'),false); setMsg('✓ הטופס מולא! עבור לדפדפן, בדוק ולחץ "שלח בקשה".', 'ok'); $('go').disabled=false; }
+        else if (j.status === 'error') { show($('spin'),false); setMsg('✗ משהו נכשל. נסה שוב, וודא ש-Chrome פתוח.', 'err'); $('go').disabled=false; }
+        else { setTimeout(function(){poll(id,tries+1);}, 2000); }
+      }).catch(function(){ setTimeout(function(){poll(id,tries+1);}, 2500); });
+    }
+
+    function run(){
+      var btn=$('go'); btn.disabled=true;
+      show($('spin'),true); show($('steps'),true); stage(1); setMsg('');
+      var item = Office.context.mailbox.item;
+      var atts = (item.attachments||[]).filter(function(a){ return a.attachmentType==='file' && /\.pdf$/i.test(a.name); });
+      if (!atts.length) { show($('spin'),false); show($('steps'),false); setMsg('לא נמצאה צרופת PDF במייל הזה', 'err'); btn.disabled=false; return; }
+      var pdf = atts[0];
+      item.body.getAsync('text', function(b){
+        var emailText = (b.status==='succeeded') ? b.value : '';
+        item.getAttachmentContentAsync(pdf.id, function(res){
+          if (res.status!=='succeeded'){ show($('spin'),false); setMsg('שגיאה בקריאת הצרופה', 'err'); btn.disabled=false; return; }
+          fetch(HELPER + '/fill', { method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ filename: pdf.name, contentBase64: res.value.content, emailText: emailText }) })
+            .then(function(r){return r.json();})
+            .then(function(j){ if (j.ok && j.id) poll(j.id); else { show($('spin'),false); setMsg('שגיאה: '+(j.error||'לא ידוע'),'err'); btn.disabled=false; } })
+            .catch(function(e){ show($('spin'),false); setMsg('אין חיבור לעוזר המקומי. ('+e.message+')','err'); btn.disabled=false; });
+        });
+      });
+    }
+    Office.onReady(function(){ $('go').addEventListener('click', run); });
   </script>
 </body>
 </html>

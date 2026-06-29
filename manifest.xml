@@ -11,8 +11,8 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Boardirector PR" />
   <Description DefaultValue="ממלא בקשת רכש לבורדירקטור מהמייל הנבחר" />
-  <IconUrl DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-80.png" />
+  <IconUrl DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-32.png?v=2" />
+  <HighResolutionIconUrl DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-80.png?v=2" />
   <SupportUrl DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/" />
   <Hosts>
     <Host Name="Mailbox" />
@@ -25,7 +25,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/taskpane.html" />
+        <SourceLocation DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/taskpane.html?v=3" />
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -74,12 +74,12 @@
       </Hosts>
       <Resources>
         <bt:Images>
-          <bt:Image id="icon16" DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-16.png" />
-          <bt:Image id="icon32" DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-32.png" />
-          <bt:Image id="icon80" DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-80.png" />
+          <bt:Image id="icon16" DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-16.png?v=2" />
+          <bt:Image id="icon32" DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-32.png?v=2" />
+          <bt:Image id="icon80" DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/assets/icon-80.png?v=2" />
         </bt:Images>
         <bt:Urls>
-          <bt:Url id="taskpaneUrl" DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/taskpane.html" />
+          <bt:Url id="taskpaneUrl" DefaultValue="https://neildsqlink.github.io/boardirector-outlook-addin/taskpane.html?v=3" />
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="groupLabel" DefaultValue="בורדירקטור" />
