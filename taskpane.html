@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>בקשת רכש — Boardirector</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; padding: 22px; text-align: center; color: #222; }
+    h2 { margin: 0 0 6px; }
+    p { color: #555; margin: 0 0 18px; }
+    button { font-size: 18px; padding: 14px 24px; background: #e04f2a; color: #fff;
+             border: none; border-radius: 10px; cursor: pointer; }
+    button:active { background: #c5421f; }
+    .msg { margin-top: 16px; color: #1a7f37; min-height: 22px; }
+    .hint { margin-top: 22px; font-size: 12px; color: #999; }
+  </style>
+</head>
+<body>
+  <h2>בקשת רכש — Boardirector</h2>
+  <p>ימלא את הטופס מהמייל הפתוח/הנבחר.</p>
+  <button id="go">מלא בקשת רכש ⟶</button>
+  <div class="msg" id="msg"></div>
+  <div class="hint">בפעם הראשונה macOS ישאל אם לאפשר פתיחת "Boardirector PR" — אשר.</div>
+  <script>
+    function launch() {
+      document.getElementById('msg').textContent = 'מפעיל… אפשר לחזור ל-Outlook ✓';
+      window.location.href = 'boardirector://run';
+    }
+    Office.onReady(function () {
+      document.getElementById('go').addEventListener('click', launch);
+      // try auto-launch; if the OS blocks it without a gesture, the button still works
+      setTimeout(launch, 250);
+    });
+  </script>
+</body>
+</html>
