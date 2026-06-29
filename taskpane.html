@@ -21,16 +21,21 @@
   <p>ימלא את הטופס מהמייל הפתוח/הנבחר.</p>
   <button id="go">מלא בקשת רכש ⟶</button>
   <div class="msg" id="msg"></div>
-  <div class="hint">בפעם הראשונה macOS ישאל אם לאפשר פתיחת "Boardirector PR" — אשר.</div>
+  <div class="hint">הדפדפן ייפתח לרגע וישאל אם לפתוח את "Boardirector PR" — אשר. אפשר לסמן "תמיד".</div>
   <script>
+    var LAUNCH = 'https://neildsqlink.github.io/boardirector-outlook-addin/launch.html';
     function launch() {
-      document.getElementById('msg').textContent = 'מפעיל… אפשר לחזור ל-Outlook ✓';
-      window.location.href = 'boardirector://run';
+      document.getElementById('msg').textContent = 'פותח בדפדפן… חזור ל-Outlook אחרי האישור ✓';
+      // The Outlook task-pane webview blocks custom URL schemes, so bounce
+      // through the real system browser, which CAN launch boardirector://
+      try {
+        Office.context.ui.openBrowserWindow(LAUNCH);
+      } catch (e) {
+        window.open(LAUNCH, '_blank');
+      }
     }
     Office.onReady(function () {
       document.getElementById('go').addEventListener('click', launch);
-      // try auto-launch; if the OS blocks it without a gesture, the button still works
-      setTimeout(launch, 250);
     });
   </script>
 </body>

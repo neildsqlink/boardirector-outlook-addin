@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>מפעיל בקשת רכש…</title>
+  <style>
+    body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; text-align: center; padding: 48px; color: #222; }
+    a { font-size: 20px; color: #fff; background: #e04f2a; padding: 12px 22px; border-radius: 10px; text-decoration: none; display: inline-block; margin-top: 14px; }
+    p { color: #555; }
+  </style>
+</head>
+<body>
+  <h2>מפעיל בקשת רכש — Boardirector…</h2>
+  <p>אם הדפדפן שואל אם לפתוח את "Boardirector PR" — אשר.<br>אפשר לסגור את הלשונית הזו אחר כך.</p>
+  <a id="link" href="boardirector://run">לא קרה כלום? לחץ כאן ⟶</a>
+  <script>
+    // Real system browser CAN launch the custom protocol (unlike the Outlook webview)
+    window.location.href = 'boardirector://run';
+  </script>
+</body>
+</html>
